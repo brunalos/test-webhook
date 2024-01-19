@@ -34,7 +34,6 @@ cancel_state = 0
 
 # Start the conversation.
 
-
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     logger.info("Entered start function.")
     await update.message.reply_text(
@@ -61,17 +60,17 @@ async def cancel_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
 # Delete webhook
 
 
-# async def delete_webhook():
-#     bot = Bot(token=token)
-#     await bot.deleteWebhook()
-#     logger.info("Webhook deleted successfully.")
+async def delete_webhook():
+    bot = Bot(token=token)
+    await bot.deleteWebhook()
+    logger.info("Webhook deleted successfully.")
 
-# Set the Telegram webhook URL
+#Set the Telegram webhook URL
 
 
 async def set_webhook():
-    #await delete_webhook()  # Delete existing webhook
-    webhook_url = f"https://api.telegram.org/bot{token}/setWebhook?url={ngrok_public_url}"
+    await delete_webhook()  # Delete existing webhook
+    webhook_url = f"https://api.telegram.org/bot{token}/setWebhook?url={ngrok_public_url}/post"
     bot = Bot(token=token)
     logger.info("Setting up ngrok webhook...")
     await bot.setWebhook(url=webhook_url)
@@ -97,20 +96,21 @@ application.add_handler(conv_handler)
 # Handle webhook updates in a separate thread
 def handle_webhook_update(update_json, bot):
     try:
-        loop = asyncio.get_event_loop()
-    except RuntimeError:
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-
-    update = Update.de_json(update_json, bot)
-    loop.run_until_complete(application.process_update(update))
+        update = Update.de_json(update_json, bot)
+        asyncio.run(application.process_update(update))
+        logger.info("Webhook request processed successfully.")
+    except Exception as e:
+        logger.error(f"Error processing update: {e}")
 
 
 # Create a Bottle web application.
 app = Bottle()
 
+@app.get('/')
+def webhook_updated():
+    return "Received webhook request"
 
-@app.post('/')
+@app.post('/post')
 def webhook_handler():
     logger.info("Received webhook request.")
     try:

@@ -46,5 +46,3 @@ This Python script sets up a basic Telegram bot using the Bottle framework to ha
   - `asyncio`: Asynchronous programming library.
   - `ThreadPoolExecutor`: Concurrent execution of tasks in a separate thread.
 
-
-
